@@ -1,6 +1,31 @@
-import { PDFViewer } from '@/components/PDFViewer';
+'use client';
+
+import { usePDFStore } from '@/store/usePDFStore';
+import { AddElementCommand } from '@/lib/commands';
+import dynamic from 'next/dynamic';
+
+const PDFViewer = dynamic(() => import('@/components/PDFViewer').then((m) => m.PDFViewer), { ssr: false });
 
 export default function Home() {
+  const performAction = usePDFStore((s) => s.performAction);
+  const undo = usePDFStore((s) => s.undo);
+  const redo = usePDFStore((s) => s.redo);
+  const currentPage = usePDFStore((s) => s.currentPage);
+  const past = usePDFStore((s) => s.past);
+  const future = usePDFStore((s) => s.future);
+
+  const handleAddText = () => {
+    const id = crypto.randomUUID();
+    const cmd = new AddElementCommand({
+      id,
+      type: 'text',
+      page: currentPage,
+      x: 100,
+      y: 100,
+      properties: { content: 'Hello World' },
+    });
+    performAction(cmd);
+  };
   return (
     <main className="flex h-screen w-screen overflow-hidden bg-gray-100 flex-col md:flex-row">
       {/* 
@@ -19,10 +44,31 @@ export default function Home() {
         </div>
         <nav className="flex-1 p-4 space-y-2">
           {/* Placeholder tools */}
-          <div className="p-3 bg-blue-50 text-blue-700 rounded-lg cursor-pointer font-medium hover:bg-blue-100 transition-colors">
-            View Mode
+          <button
+            onClick={handleAddText}
+            className="w-full text-left p-3 block bg-blue-50 text-blue-700 rounded-lg cursor-pointer font-medium hover:bg-blue-100 transition-colors"
+          >
+            Add Test Text
+          </button>
+
+          <div className="flex space-x-2 mt-4">
+            <button
+              onClick={undo}
+              disabled={past.length === 0}
+              className="flex-1 p-2 bg-gray-100 text-gray-700 disabled:opacity-50 rounded font-medium hover:bg-gray-200"
+            >
+              Undo
+            </button>
+            <button
+              onClick={redo}
+              disabled={future.length === 0}
+              className="flex-1 p-2 bg-gray-100 text-gray-700 disabled:opacity-50 rounded font-medium hover:bg-gray-200"
+            >
+              Redo
+            </button>
           </div>
-          <div className="p-3 text-gray-600 rounded-lg cursor-pointer font-medium hover:bg-gray-50 transition-colors">
+
+          <div className="p-3 mt-4 text-gray-600 rounded-lg cursor-pointer font-medium hover:bg-gray-50 transition-colors">
             Edit Text
           </div>
           <div className="p-3 text-gray-600 rounded-lg cursor-pointer font-medium hover:bg-gray-50 transition-colors">

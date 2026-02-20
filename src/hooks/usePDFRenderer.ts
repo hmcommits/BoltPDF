@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useMemo } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Point standard parser to the worker. 
@@ -44,9 +44,9 @@ export const usePDFRenderer = () => {
             viewport: viewport,
         };
 
-        await page.render(renderContext).promise;
+        await page.render(renderContext as any).promise;
         return { width: viewport.width, height: viewport.height };
     }, []);
 
-    return { loadDocument, getPageSize, renderPage };
+    return useMemo(() => ({ loadDocument, getPageSize, renderPage }), [loadDocument, getPageSize, renderPage]);
 };

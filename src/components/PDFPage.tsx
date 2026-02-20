@@ -16,6 +16,8 @@ export const PDFPage: React.FC<PDFPageProps> = ({ pageNum, pdfRenderer }) => {
 
     const zoom = usePDFStore((s) => s.zoom);
     const setCurrentPage = usePDFStore((s) => s.setCurrentPage);
+    const allElements = usePDFStore((s) => s.elements);
+    const elements = allElements.filter((e) => e.page === pageNum);
 
     // A4 proportion base
     const [dimensions, setDimensions] = useState<{ width: number; height: number }>({ width: 800, height: 1131 });
@@ -87,6 +89,22 @@ export const PDFPage: React.FC<PDFPageProps> = ({ pageNum, pdfRenderer }) => {
                             <span className="text-gray-400 font-semibold tracking-wide">Rendering Skeleton {pageNum}...</span>
                         </div>
                     )}
+                    {isRendered && elements.map(el => (
+                        <div
+                            key={el.id}
+                            className="absolute z-20 whitespace-nowrap"
+                            style={{
+                                left: el.x * zoom,
+                                top: el.y * zoom,
+                            }}
+                        >
+                            {el.type === 'text' && (
+                                <span className="text-red-600 font-bold text-xl drop-shadow-md">
+                                    {el.properties.content}
+                                </span>
+                            )}
+                        </div>
+                    ))}
                 </>
             ) : (
                 <div className="w-full h-full bg-gray-50 flex items-center justify-center">
