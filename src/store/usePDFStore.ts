@@ -9,6 +9,10 @@ interface PDFState {
     // Elements state
     elements: PDFElement[];
 
+    // UI State
+    activeTool: 'select' | 'text' | 'shape';
+    selectedElement: string | null;
+
     // History tracking
     past: Command[];
     future: Command[];
@@ -16,6 +20,8 @@ interface PDFState {
     setNumPages: (n: number) => void;
     setZoom: (z: number) => void;
     setCurrentPage: (p: number) => void;
+    setActiveTool: (tool: 'select' | 'text' | 'shape') => void;
+    setSelectedElement: (id: string | null) => void;
 
     // Element operations
     addElement: (element: PDFElement) => void;
@@ -37,12 +43,16 @@ export const usePDFStore = create<PDFState>((set, get) => ({
     currentPage: 1,
 
     elements: [],
+    activeTool: 'select',
+    selectedElement: null,
     past: [],
     future: [],
 
     setNumPages: (n) => set({ numPages: n }),
     setZoom: (z) => set({ zoom: z }),
     setCurrentPage: (p) => set({ currentPage: p }),
+    setActiveTool: (tool) => set({ activeTool: tool }),
+    setSelectedElement: (id) => set({ selectedElement: id }),
 
     addElement: (element) => set((state) => ({ elements: [...state.elements, element] })),
     removeElement: (id) => set((state) => ({ elements: state.elements.filter(e => e.id !== id) })),

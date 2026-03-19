@@ -1,31 +1,18 @@
 'use client';
 
 import { usePDFStore } from '@/store/usePDFStore';
-import { AddElementCommand } from '@/lib/commands';
 import dynamic from 'next/dynamic';
 
 const PDFViewer = dynamic(() => import('@/components/PDFViewer').then((m) => m.PDFViewer), { ssr: false });
 
 export default function Home() {
-  const performAction = usePDFStore((s) => s.performAction);
   const undo = usePDFStore((s) => s.undo);
   const redo = usePDFStore((s) => s.redo);
-  const currentPage = usePDFStore((s) => s.currentPage);
   const past = usePDFStore((s) => s.past);
   const future = usePDFStore((s) => s.future);
+  const activeTool = usePDFStore((s) => s.activeTool);
+  const setActiveTool = usePDFStore((s) => s.setActiveTool);
 
-  const handleAddText = () => {
-    const id = crypto.randomUUID();
-    const cmd = new AddElementCommand({
-      id,
-      type: 'text',
-      page: currentPage,
-      x: 100,
-      y: 100,
-      properties: { content: 'Hello World' },
-    });
-    performAction(cmd);
-  };
   return (
     <main className="flex h-screen w-screen overflow-hidden bg-gray-100 flex-col md:flex-row">
       {/* 
@@ -43,12 +30,23 @@ export default function Home() {
           <p className="text-sm text-gray-500 mt-1">Direct PDF Editor</p>
         </div>
         <nav className="flex-1 p-4 space-y-2">
-          {/* Placeholder tools */}
           <button
-            onClick={handleAddText}
-            className="w-full text-left p-3 block bg-blue-50 text-blue-700 rounded-lg cursor-pointer font-medium hover:bg-blue-100 transition-colors"
+            onClick={() => setActiveTool('select')}
+            className={`w-full text-left p-3 block rounded-lg cursor-pointer font-medium transition-colors ${activeTool === 'select' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
           >
-            Add Test Text
+            Select
+          </button>
+          <button
+            onClick={() => setActiveTool('text')}
+            className={`w-full text-left p-3 block rounded-lg cursor-pointer font-medium transition-colors ${activeTool === 'text' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
+          >
+            Add Text
+          </button>
+          <button
+            onClick={() => setActiveTool('shape')}
+            className={`w-full text-left p-3 block rounded-lg cursor-pointer font-medium transition-colors ${activeTool === 'shape' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
+          >
+            Add Rectangle
           </button>
 
           <div className="flex space-x-2 mt-4">
@@ -84,17 +82,26 @@ export default function Home() {
 
       {/* Mobile Bottom Dock (Hidden on desktop) */}
       <div className="md:hidden flex h-16 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-20 shrink-0 items-center justify-around px-2">
-        <button className="flex flex-col items-center p-2 text-blue-600">
-          <div className="w-6 h-6 bg-blue-100 rounded-full mb-1"></div>
-          <span className="text-xs font-medium">View</span>
+        <button
+          onClick={() => setActiveTool('select')}
+          className={`flex flex-col items-center p-2 ${activeTool === 'select' ? 'text-blue-600' : 'text-gray-500'}`}
+        >
+          <div className={`w-6 h-6 rounded-full mb-1 ${activeTool === 'select' ? 'bg-blue-100' : 'bg-gray-100'}`}></div>
+          <span className="text-xs font-medium">Select</span>
         </button>
-        <button className="flex flex-col items-center p-2 text-gray-500">
-          <div className="w-6 h-6 bg-gray-100 rounded-full mb-1"></div>
-          <span className="text-xs font-medium">Edit</span>
+        <button
+          onClick={() => setActiveTool('text')}
+          className={`flex flex-col items-center p-2 ${activeTool === 'text' ? 'text-blue-600' : 'text-gray-500'}`}
+        >
+          <div className={`w-6 h-6 rounded-full mb-1 ${activeTool === 'text' ? 'bg-blue-100' : 'bg-gray-100'}`}></div>
+          <span className="text-xs font-medium">Text</span>
         </button>
-        <button className="flex flex-col items-center p-2 text-gray-500">
-          <div className="w-6 h-6 bg-gray-100 rounded-full mb-1"></div>
-          <span className="text-xs font-medium">Tools</span>
+        <button
+          onClick={() => setActiveTool('shape')}
+          className={`flex flex-col items-center p-2 ${activeTool === 'shape' ? 'text-blue-600' : 'text-gray-500'}`}
+        >
+          <div className={`w-6 h-6 rounded-full mb-1 ${activeTool === 'shape' ? 'bg-blue-100' : 'bg-gray-100'}`}></div>
+          <span className="text-xs font-medium">Shape</span>
         </button>
       </div>
 
